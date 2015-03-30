@@ -32,25 +32,21 @@ class HttpHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
         long time = System.nanoTime();
 
         String requestIP = (((InetSocketAddress) ctx.channel().remoteAddress()).getHostString());
-        ConnectionLogUnit logUnit = new ConnectionLogUnit(requestIP, new Date());
         String URI = httpRequest.getUri();
 
         FullHttpResponse response = writeResponse(URI);
-        //close the connection immediately because no more requests can be sent from the browser
+            //close the connection immediately because no more requests can be sent from the browser
         ctx.write(response).addListener(ChannelFutureListener.CLOSE);
 
         // do some statistics
-        logUnit.setURI(URI); //
         ByteBuf buffer = Unpooled.copiedBuffer(httpRequest.toString().getBytes());
         int receivedBytes = buffer.readableBytes() + httpRequest.content().readableBytes();
         int sentBytes = response.content().writerIndex();
-        logUnit.setReceivedBytes(receivedBytes);
-        logUnit.setSentBytes(sentBytes);
-
         long time0 = System.nanoTime() - time;
         double time1 = time0 / (double) 1000000000;
         long speed = Math.round((sentBytes + receivedBytes) / time1);
-        logUnit.setSpeed(speed);
+
+        ConnectionLogUnit logUnit = new ConnectionLogUnit(requestIP, URI, sentBytes, receivedBytes, speed);
 
         StatisticsHandler.addLogUnit(logUnit);
     }

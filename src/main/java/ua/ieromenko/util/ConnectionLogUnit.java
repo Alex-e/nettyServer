@@ -15,9 +15,13 @@ public class ConnectionLogUnit {
     private int receivedBytes;
     private long speed;
 
-    public ConnectionLogUnit(String requestIP, Date timeStamp) {
-        this.IP = requestIP;
-        this.timeStamp = timeStamp;
+    public ConnectionLogUnit(String IP, String URI, int sentBytes, int receivedBytes, long speed) {
+        this.IP = IP;
+        this.URI = URI;
+        this.timeStamp = new Date();
+        this.sentBytes = sentBytes;
+        this.receivedBytes = receivedBytes;
+        this.speed = speed;
     }
 
     public String getIP() {
@@ -42,22 +46,6 @@ public class ConnectionLogUnit {
 
     public long getSpeed() {
         return speed;
-    }
-
-    public void setURI(String URI) {
-        this.URI = URI;
-    }
-
-    public void setReceivedBytes(int receivedBytes) {
-        this.receivedBytes = receivedBytes;
-    }
-
-    public void setSentBytes(int sentBytes) {
-        this.sentBytes = sentBytes;
-    }
-
-    public void setSpeed(long speed) {
-        this.speed = speed;
     }
 
     @Override
