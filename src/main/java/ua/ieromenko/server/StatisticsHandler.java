@@ -30,7 +30,6 @@ public class StatisticsHandler extends ChannelTrafficShapingHandler {
     private static final ConcurrentHashMap<String, Integer> redirectionPerURL = new ConcurrentHashMap<>();
 
     private static final LoggingQueue<ConnectionLogUnit> log = new LoggingQueue<>();
-    private final AttributeKey<ConnectionLogUnit> unit = AttributeKey.valueOf("unit");
 
     public StatisticsHandler(long checkInterval) {
         super(checkInterval);
@@ -59,17 +58,7 @@ public class StatisticsHandler extends ChannelTrafficShapingHandler {
                 }
             }
 
-            //REDIRECTION COUNT
-            if (URI.matches("/redirect\\?url=\\S*")) {
-                String url = URI.substring(URI.indexOf("=") + 1, URI.length());
-                synchronized (redirectionPerURL) {
-                    if (!redirectionPerURL.containsKey(url)) {
-                        redirectionPerURL.put(url, 1);
-                    } else {
-                        redirectionPerURL.put(url, redirectionPerURL.get(url) + 1);
-                    }
-                }
-            }
+
         }
         super.channelRead(ctx, msg);
     }
@@ -77,13 +66,24 @@ public class StatisticsHandler extends ChannelTrafficShapingHandler {
 
     @Override
     public void handlerRemoved(ChannelHandlerContext ctx) throws Exception {
-        synchronized (log) {
-            ConnectionLogUnit unit1 = ctx.channel().attr(unit).getAndRemove();
-            if (unit1 != null) log.add(unit1);
-        }
         activeConnectionsCounter.getAndDecrement();
         super.handlerRemoved(ctx);
     }
+
+    public static void addLogUnit(ConnectionLogUnit unit1) {
+            if (unit1 != null) log.add(unit1);
+    }
+
+    public static void addURLRedirection(String url) {
+        synchronized (redirectionPerURL) {
+            if (!redirectionPerURL.containsKey(url)) {
+                redirectionPerURL.put(url, 1);
+            } else {
+                redirectionPerURL.put(url, redirectionPerURL.get(url) + 1);
+            }
+        }
+    }
+
 
     public static int getTotalConnectionsCounter() {
         return totalConnectionsCounter.get();

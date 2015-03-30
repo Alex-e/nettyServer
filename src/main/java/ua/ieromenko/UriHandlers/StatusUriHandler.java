@@ -11,7 +11,6 @@ import io.netty.handler.codec.http.HttpRequest;
 import io.netty.util.CharsetUtil;
 import ua.ieromenko.server.StatisticsHandler;
 import ua.ieromenko.util.RequestsCounter;
-import ua.ieromenko.util.StatisticKeeper;
 import ua.ieromenko.util.ConnectionLogUnit;
 
 import java.util.Map;
@@ -20,10 +19,10 @@ import static io.netty.handler.codec.http.HttpResponseStatus.OK;
 import static io.netty.handler.codec.http.HttpVersion.HTTP_1_1;
 
 public class StatusUriHandler implements UriHandler {
-    private final StringBuilder buff = new StringBuilder();
 
     @Override
     public FullHttpResponse process(HttpRequest request) {
+        final StringBuilder buff = new StringBuilder();
 
         buff.append("<!DOCTYPE html><html><head>");
         buff.append("<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\" />\n");

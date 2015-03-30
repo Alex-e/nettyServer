@@ -7,7 +7,6 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.FullHttpResponse;
-import io.netty.util.AttributeKey;
 import ua.ieromenko.UriHandlers.*;
 import ua.ieromenko.util.ConnectionLogUnit;
 
@@ -24,8 +23,6 @@ import static io.netty.handler.codec.http.HttpHeaders.Names.CONTENT_TYPE;
  */
 class HttpHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
     private static final NotFoundUriHandler notFoundUriHandler = new NotFoundUriHandler();
-
-    private static final AttributeKey<ConnectionLogUnit> unit = AttributeKey.valueOf("unit");
 
     private FullHttpRequest request;
     private ConnectionLogUnit logUnit = null;
@@ -50,9 +47,11 @@ class HttpHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
 
             //let`s handle this request
             UriHandler handler;
-            if (URI.equals("/hello")) handler = new HelloUriHandler();
-            else if (URI.matches("/redirect\\?url=\\S*")) handler = new RedirectUriHandler();
-            else if (URI.equals("/status")) {
+            if (URI.equals("/hello")) {
+                handler = new HelloUriHandler();
+            } else if (URI.matches("/redirect\\?url=\\S*")) {
+                handler = new RedirectUriHandler();
+            } else if (URI.equals("/status")) {
                 handler = new StatusUriHandler();
             } else handler = notFoundUriHandler;
 
@@ -83,14 +82,8 @@ class HttpHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
             long speed = Math.round((sentBytes + receivedBytes) / time1);
             logUnit.setSpeed(speed);
         }
+        StatisticsHandler.addLogUnit(logUnit);
         ctx.flush();
-    }
-
-    @Override
-    public void channelInactive(ChannelHandlerContext ctx) throws Exception {
-        //send log of this connection before disconnecting from channel
-        ctx.channel().attr(unit).set(logUnit);
-        super.channelInactive(ctx);
     }
 
     @Override
