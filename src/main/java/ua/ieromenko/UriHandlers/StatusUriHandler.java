@@ -9,6 +9,7 @@ import io.netty.handler.codec.http.DefaultFullHttpResponse;
 import io.netty.handler.codec.http.FullHttpResponse;
 import io.netty.handler.codec.http.HttpRequest;
 import io.netty.util.CharsetUtil;
+import ua.ieromenko.server.StatisticsHandler;
 import ua.ieromenko.util.RequestsCounter;
 import ua.ieromenko.util.StatisticKeeper;
 import ua.ieromenko.util.ConnectionLogUnit;
@@ -19,19 +20,12 @@ import static io.netty.handler.codec.http.HttpResponseStatus.OK;
 import static io.netty.handler.codec.http.HttpVersion.HTTP_1_1;
 
 public class StatusUriHandler implements UriHandler {
-    private final StatisticKeeper stat;
     private final StringBuilder buff = new StringBuilder();
-
-    public StatusUriHandler(StatisticKeeper stat) {
-        this.stat = stat;
-    }
 
     @Override
     public FullHttpResponse process(HttpRequest request) {
 
-        buff.append("<!DOCTYPE html>");
-        buff.append("<html>");
-        buff.append("<head>");
+        buff.append("<!DOCTYPE html><html><head>");
         buff.append("<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\" />\n");
         buff.append("<link rel=\"stylesheet\" href=\"https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css\">\n");
         buff.append("<link rel=\"stylesheet\" href=\"https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap-theme.min.css\">\n");
@@ -42,15 +36,15 @@ public class StatusUriHandler implements UriHandler {
         buff.append("<h2>SERVER STATISTICS</h2>");
 
         // Total connections
-        buff.append("<h4>Total connections: ").append(stat.getConnectionsCounter()).append("</h4>");
+        buff.append("<h4>Total connections: ").append(StatisticsHandler.getTotalConnectionsCounter()).append("</h4>");
         // Active connections
-        buff.append("<h4>Active connections: ").append(stat.getActiveConnectionsCounter()).append("</h4>");
+        buff.append("<h4>Active connections: ").append(StatisticsHandler.getActiveConnectionsCounter()).append("</h4>");
 
         // Unique Requests per one IP table
         buff.append("<h4>Unique requests per IP :</h4>");
         buff.append("<table class=\"table table-hover table-bordered table-striped\" style=\"width: 30%;\"><tbody>");
         buff.append("<tr><th>").append(" IP ").append("</th><th>").append("requests").append("</th></tr>");
-        for (Map.Entry<String, RequestsCounter> pair : stat.getRequestsCounter().entrySet()) {
+        for (Map.Entry<String, RequestsCounter> pair : StatisticsHandler.getRequestsCounter().entrySet()) {
             buff.append("<tr><td>");
             buff.append(pair.getKey());
             buff.append("</td><td>");
@@ -64,7 +58,7 @@ public class StatusUriHandler implements UriHandler {
         buff.append("<table class=\"table table-hover table-bordered table-striped\" style=\"width: 30%;\"><tbody>");
         buff.append("<tr><th>").append(" IP ").append("</th><th>").append("requests")
                 .append("</th><th>").append(" last request ").append("</th></tr>");
-        for (Map.Entry<String, RequestsCounter> pair : stat.getRequestsCounter().entrySet()) {
+        for (Map.Entry<String, RequestsCounter> pair : StatisticsHandler.getRequestsCounter().entrySet()) {
             buff.append("<tr><td>");
             buff.append(pair.getKey());
             buff.append("</td><td>");
@@ -78,9 +72,9 @@ public class StatusUriHandler implements UriHandler {
         //Counter of the redirection per URL
         buff.append("<h4>URL redirection counter :</h4>");
         buff.append("<table class=\"table table-hover table-bordered table-striped\" style=\"width: 40%;\"><tbody>");
-        buff.append("<tr><th class=\"col-md-4\">").append(" URL ")
+        buff.append("<tr><th class=\"col-md-4\"> URL ")
                 .append("</th><th class=\"col-md-1\">").append(" count ").append("</th></tr>");
-        for (Map.Entry<String, Integer> pair : stat.getRedirectionPerURL().entrySet()) {
+        for (Map.Entry<String, Integer> pair : StatisticsHandler.getRedirectionPerURL().entrySet()) {
             buff.append("<tr><td>");
             buff.append(pair.getKey());
             buff.append("</td><td>");
@@ -92,7 +86,7 @@ public class StatusUriHandler implements UriHandler {
         //Connections log
         buff.append("<h4>Connections log :</h4>");
         buff.append("<table class=\"table table-hover table-bordered table-striped\" style=\"width: 70%;\"><tbody>");
-        buff.append("<tr><th class=\"col-md-1\">").append("IP ")
+        buff.append("<tr><th class=\"col-md-1\"> IP ")
                 .append("</th><th class=\"col-md-3\">").append("URI ")
                 .append("</th><th class=\"col-md-3\">").append("timestamp ")
                 .append("</th><th class=\"col-md-1\">").append("sent bytes ")
@@ -100,7 +94,7 @@ public class StatusUriHandler implements UriHandler {
                 .append("</th><th class=\"col-md-1\">").append("speed (Bytes/Sec)")
                 .append("</th></tr>");
         buff.append("</tbody>");
-        for (ConnectionLogUnit c : stat.getLog()) {
+        for (ConnectionLogUnit c : StatisticsHandler.getLog()) {
             buff.append("<tr><td>");
             buff.append(c.getIP()).append("</td><td>");
             buff.append(c.getURI()).append("</td><td>");

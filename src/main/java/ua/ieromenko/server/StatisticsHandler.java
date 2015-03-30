@@ -8,7 +8,6 @@ import io.netty.util.AttributeKey;
 import ua.ieromenko.util.ConnectionLogUnit;
 import ua.ieromenko.util.LoggingQueue;
 import ua.ieromenko.util.RequestsCounter;
-import ua.ieromenko.util.StatisticKeeper;
 
 import java.net.InetSocketAddress;
 import java.util.concurrent.ConcurrentHashMap;
@@ -24,15 +23,14 @@ import static io.netty.channel.ChannelHandler.Sharable;
 @Sharable
 public class StatisticsHandler extends ChannelTrafficShapingHandler {
 
-    private final AtomicInteger totalConnectionsCounter = new AtomicInteger(0);
-    private final AtomicInteger activeConnectionsCounter = new AtomicInteger(0);
+    private static final AtomicInteger totalConnectionsCounter = new AtomicInteger(0);
+    private static final AtomicInteger activeConnectionsCounter = new AtomicInteger(0);
 
-    private final ConcurrentHashMap<String, RequestsCounter> requestsCounter = new ConcurrentHashMap<>();
-    private final ConcurrentHashMap<String, Integer> redirectionPerURL = new ConcurrentHashMap<>();
+    private static final ConcurrentHashMap<String, RequestsCounter> requestsCounter = new ConcurrentHashMap<>();
+    private static final ConcurrentHashMap<String, Integer> redirectionPerURL = new ConcurrentHashMap<>();
 
-    private final LoggingQueue<ConnectionLogUnit> log = new LoggingQueue<>();
+    private static final LoggingQueue<ConnectionLogUnit> log = new LoggingQueue<>();
     private final AttributeKey<ConnectionLogUnit> unit = AttributeKey.valueOf("unit");
-    private final AttributeKey<StatisticKeeper> stat = AttributeKey.valueOf("stat");
 
     public StatisticsHandler(long checkInterval) {
         super(checkInterval);
@@ -46,13 +44,6 @@ public class StatisticsHandler extends ChannelTrafficShapingHandler {
 
             HttpRequest request = (HttpRequest) msg;
             String URI = request.getUri();
-
-            // SEND STATISTICS TO HttpHandler
-            if (URI.equals("/status")) {
-                StatisticKeeper c = new StatisticKeeper(redirectionPerURL,
-                        log, requestsCounter, activeConnectionsCounter.get(), totalConnectionsCounter.get());
-                ctx.channel().attr(stat).set(c);
-            }
 
             //IP REQUESTS COUNTER
             //UNIQUE REQUESTS PER IP COUNTER
@@ -94,4 +85,23 @@ public class StatisticsHandler extends ChannelTrafficShapingHandler {
         super.handlerRemoved(ctx);
     }
 
+    public static int getTotalConnectionsCounter() {
+        return totalConnectionsCounter.get();
+    }
+
+    public static int getActiveConnectionsCounter() {
+        return activeConnectionsCounter.get();
+    }
+
+    public static ConcurrentHashMap<String, RequestsCounter> getRequestsCounter() {
+        return requestsCounter;
+    }
+
+    public static ConcurrentHashMap<String, Integer> getRedirectionPerURL() {
+        return redirectionPerURL;
+    }
+
+    public static LoggingQueue<ConnectionLogUnit> getLog() {
+        return log;
+    }
 }

@@ -10,7 +10,6 @@ import io.netty.handler.codec.http.FullHttpResponse;
 import io.netty.util.AttributeKey;
 import ua.ieromenko.UriHandlers.*;
 import ua.ieromenko.util.ConnectionLogUnit;
-import ua.ieromenko.util.StatisticKeeper;
 
 import java.net.InetSocketAddress;
 import java.util.Date;
@@ -27,7 +26,6 @@ class HttpHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
     private static final NotFoundUriHandler notFoundUriHandler = new NotFoundUriHandler();
 
     private static final AttributeKey<ConnectionLogUnit> unit = AttributeKey.valueOf("unit");
-    private static final AttributeKey<StatisticKeeper> stat = AttributeKey.valueOf("stat");
 
     private FullHttpRequest request;
     private ConnectionLogUnit logUnit = null;
@@ -55,9 +53,7 @@ class HttpHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
             if (URI.equals("/hello")) handler = new HelloUriHandler();
             else if (URI.matches("/redirect\\?url=\\S*")) handler = new RedirectUriHandler();
             else if (URI.equals("/status")) {
-                //read statistics that StatisticsHandler has already prepared
-                StatisticKeeper wrapper = ctx.channel().attr(stat).getAndRemove();
-                handler = new StatusUriHandler(wrapper);
+                handler = new StatusUriHandler();
             } else handler = notFoundUriHandler;
 
             //send response
