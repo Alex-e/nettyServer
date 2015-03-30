@@ -11,6 +11,7 @@ import io.netty.handler.codec.http.HttpRequest;
 import io.netty.util.CharsetUtil;
 
 
+import static io.netty.handler.codec.http.HttpHeaders.Names.CONTENT_TYPE;
 import static io.netty.handler.codec.http.HttpResponseStatus.OK;
 import static io.netty.handler.codec.http.HttpVersion.HTTP_1_1;
 
@@ -19,14 +20,16 @@ public class HelloUriHandler implements UriHandler {
     private static final String ANSWER_HELLO_WORLD = "<!DOCTYPE html><html><body><h1>Hello World!!!</h1></body></html>";
 
     @Override
-    public FullHttpResponse process(HttpRequest request) {
+    public FullHttpResponse process(String uri) {
         try {
             Thread.sleep(TIMEOUT);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        return new DefaultFullHttpResponse(
+        FullHttpResponse response = new DefaultFullHttpResponse(
                 HTTP_1_1, OK, Unpooled.copiedBuffer(ANSWER_HELLO_WORLD, CharsetUtil.UTF_8)
         );
+        response.headers().set(CONTENT_TYPE, "text/html; charset=UTF-8");
+        return response;
     }
 }

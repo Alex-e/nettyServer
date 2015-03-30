@@ -7,7 +7,6 @@ package ua.ieromenko.UriHandlers;
 import io.netty.buffer.Unpooled;
 import io.netty.handler.codec.http.DefaultFullHttpResponse;
 import io.netty.handler.codec.http.FullHttpResponse;
-import io.netty.handler.codec.http.HttpRequest;
 import io.netty.util.CharsetUtil;
 import ua.ieromenko.server.StatisticsHandler;
 import ua.ieromenko.util.RequestsCounter;
@@ -15,13 +14,14 @@ import ua.ieromenko.util.ConnectionLogUnit;
 
 import java.util.Map;
 
+import static io.netty.handler.codec.http.HttpHeaders.Names.CONTENT_TYPE;
 import static io.netty.handler.codec.http.HttpResponseStatus.OK;
 import static io.netty.handler.codec.http.HttpVersion.HTTP_1_1;
 
 public class StatusUriHandler implements UriHandler {
 
     @Override
-    public FullHttpResponse process(HttpRequest request) {
+    public FullHttpResponse process(String uri) {
         final StringBuilder buff = new StringBuilder();
 
         buff.append("<!DOCTYPE html><html><head>");
@@ -110,6 +110,7 @@ public class StatusUriHandler implements UriHandler {
                 OK,
                 Unpooled.copiedBuffer(buff.toString(), CharsetUtil.UTF_8)
         );
+        response.headers().set(CONTENT_TYPE, "text/html; charset=UTF-8");
         return response;
     }
 }

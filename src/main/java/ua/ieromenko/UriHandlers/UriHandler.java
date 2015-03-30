@@ -10,10 +10,11 @@ public interface UriHandler{
     /**
      * Create a response
      *
-     * @param request
+     *
+     * @param uri
      * @return
      */
-    FullHttpResponse process(HttpRequest request);
+    FullHttpResponse process(String uri);
 
 
 }
