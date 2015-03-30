@@ -20,14 +20,13 @@ public class HelloUriHandler implements UriHandler {
 
     @Override
     public FullHttpResponse process(HttpRequest request) {
-        FullHttpResponse response = new DefaultFullHttpResponse(
-                HTTP_1_1, OK, Unpooled.copiedBuffer(ANSWER_HELLO_WORLD, CharsetUtil.UTF_8)
-        );
         try {
             Thread.sleep(TIMEOUT);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        return response;
+        return new DefaultFullHttpResponse(
+                HTTP_1_1, OK, Unpooled.copiedBuffer(ANSWER_HELLO_WORLD, CharsetUtil.UTF_8)
+        );
     }
 }

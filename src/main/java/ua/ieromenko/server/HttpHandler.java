@@ -22,41 +22,32 @@ import static io.netty.handler.codec.http.HttpHeaders.Names.CONTENT_TYPE;
  * <p/>
  */
 class HttpHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
-    private static final NotFoundUriHandler notFoundUriHandler = new NotFoundUriHandler();
-
-    private FullHttpRequest request;
-    private ConnectionLogUnit logUnit = null;
-    private int sentBytes;
-    private int receivedBytes;
-    private long time;
-
-    @Override
-    public void channelActive(ChannelHandlerContext ctx) throws Exception {
-        super.channelActive(ctx);
-        time = System.nanoTime(); //channel is connected and ready
-
-        String requestIP = (((InetSocketAddress) ctx.channel().remoteAddress()).getHostString());
-        logUnit = new ConnectionLogUnit(requestIP, new Date());
-    }
+    private static final NotFoundUriHandler NOT_FOUND_URI_HANDLER = new NotFoundUriHandler();
+    private static final HelloUriHandler HELLO_URI_HANDLER = new HelloUriHandler();
+    private static final RedirectUriHandler REDIRECT_URI_HANDLER = new RedirectUriHandler();
+    private static final StatusUriHandler STATUS_URI_HANDLER = new StatusUriHandler();
 
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, FullHttpRequest httpRequest) {
+        long time = System.nanoTime();
+
+        String requestIP = (((InetSocketAddress) ctx.channel().remoteAddress()).getHostString());
+        ConnectionLogUnit logUnit = new ConnectionLogUnit(requestIP, new Date());
         if (httpRequest != null) {
-            this.request = httpRequest;
-            String URI = request.getUri();
+            String URI = httpRequest.getUri();
 
             //let`s handle this request
             UriHandler handler;
             if (URI.equals("/hello")) {
-                handler = new HelloUriHandler();
+                handler = HELLO_URI_HANDLER;
             } else if (URI.matches("/redirect\\?url=\\S*")) {
-                handler = new RedirectUriHandler();
+                handler = REDIRECT_URI_HANDLER;
             } else if (URI.equals("/status")) {
-                handler = new StatusUriHandler();
-            } else handler = notFoundUriHandler;
+                handler = STATUS_URI_HANDLER;
+            } else handler = NOT_FOUND_URI_HANDLER;
 
             //send response
-            FullHttpResponse response = handler.process(request);
+            FullHttpResponse response = handler.process(httpRequest);
             //close the connection immediately because no more requests can be sent from the browser
             response.headers().set(CONTENT_TYPE, "text/html; charset=UTF-8");
             ctx.write(response).addListener(ChannelFutureListener.CLOSE);
@@ -64,25 +55,22 @@ class HttpHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
             // do some statistics
             logUnit.setURI(URI); //
             ByteBuf buffer = Unpooled.copiedBuffer(httpRequest.toString().getBytes());
-            receivedBytes = buffer.readableBytes() + httpRequest.content().readableBytes();
-            sentBytes = response.content().writerIndex();
+            int receivedBytes = buffer.readableBytes() + httpRequest.content().readableBytes();
+            int sentBytes = response.content().writerIndex();
             logUnit.setReceivedBytes(receivedBytes);
             logUnit.setSentBytes(sentBytes);
-        }
-    }
 
-
-    @Override
-    public void channelReadComplete(ChannelHandlerContext ctx) throws Exception {
-        //calculate speed
-        //if there is another formula i can change that
-        if (request != null) {
             long time0 = System.nanoTime() - time;
             double time1 = time0 / (double) 1000000000;
             long speed = Math.round((sentBytes + receivedBytes) / time1);
             logUnit.setSpeed(speed);
+
+            StatisticsHandler.addLogUnit(logUnit);
         }
-        StatisticsHandler.addLogUnit(logUnit);
+    }
+
+    @Override
+    public void channelReadComplete(ChannelHandlerContext ctx) throws Exception {
         ctx.flush();
     }
 

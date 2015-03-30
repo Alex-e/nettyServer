@@ -18,13 +18,14 @@ public class RedirectUriHandler implements UriHandler {
     @Override
     public FullHttpResponse process(HttpRequest request) {
         String requestURI = request.getUri();
-        String url = requestURI.substring(requestURI.indexOf("url=") + 1, requestURI.length());
+        String url = requestURI.substring(requestURI.indexOf("=") + 1, requestURI.length());
 
         StatisticsHandler.addURLRedirection(url);
 
-        if (!url.matches("/redirect\\?url=http\\S*")) {
+        if (!url.matches("http://\\S*")) {
             url = "http://" + url;
         }
+
         FullHttpResponse response = new DefaultFullHttpResponse(
                 HTTP_1_1, FOUND);
         response.headers().set(HttpHeaders.Names.LOCATION, url);
