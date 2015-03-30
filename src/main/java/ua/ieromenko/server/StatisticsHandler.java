@@ -70,8 +70,8 @@ public class StatisticsHandler extends ChannelTrafficShapingHandler {
         super.handlerRemoved(ctx);
     }
 
-    public static void addLogUnit(ConnectionLogUnit unit1) {
-            if (unit1 != null) log.add(unit1);
+    public static void addLogUnit(ConnectionLogUnit unit) {
+         log.add(unit);
     }
 
     public static void addURLRedirection(String url) {

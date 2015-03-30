@@ -16,16 +16,9 @@ public final class LoggingQueue<E> implements Iterable<E> {
         return queue.iterator();
     }
 
-    public boolean add(E e) {
-        if (queue.size() > 15) clean();
+    public synchronized boolean add(E e) {
+        if (queue.size() > 15) queue.remove();
         return queue.add(e);
     }
 
-    private void clean() {
-        do {
-            queue.remove();
-        }
-        while (queue.size() > 15);
-
-    }
 }
