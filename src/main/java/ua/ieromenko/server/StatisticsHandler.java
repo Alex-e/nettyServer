@@ -37,29 +37,8 @@ public class StatisticsHandler extends ChannelTrafficShapingHandler {
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-        if (msg instanceof FullHttpRequest) {
             totalConnectionsCounter.getAndIncrement();
             activeConnectionsCounter.getAndIncrement();
-
-            HttpRequest request = (HttpRequest) msg;
-            String URI = request.getUri();
-
-            //IP REQUESTS COUNTER
-            //UNIQUE REQUESTS PER IP COUNTER
-            String requestIP = (((InetSocketAddress) ctx.channel().remoteAddress()).getHostString());
-            RequestsCounter c;
-            synchronized (requestsCounter) {
-                if (!requestsCounter.containsKey(requestIP)) {
-                    c = new RequestsCounter(requestIP, URI);
-                    requestsCounter.put(requestIP, c);
-                } else {
-                    c = requestsCounter.get(requestIP).addRequest(URI);
-                    requestsCounter.put(requestIP, c);
-                }
-            }
-
-
-        }
         super.channelRead(ctx, msg);
     }
 
@@ -84,6 +63,18 @@ public class StatisticsHandler extends ChannelTrafficShapingHandler {
         }
     }
 
+    public static void addRequestsCounter(String requestIP, String URI) {
+        RequestsCounter c;
+        synchronized (requestsCounter) {
+            if (!requestsCounter.containsKey(requestIP)) {
+                c = new RequestsCounter(requestIP, URI);
+                requestsCounter.put(requestIP, c);
+            } else {
+                c = requestsCounter.get(requestIP).addRequest(URI);
+                requestsCounter.put(requestIP, c);
+            }
+        }
+    }
 
     public static int getTotalConnectionsCounter() {
         return totalConnectionsCounter.get();

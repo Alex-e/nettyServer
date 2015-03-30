@@ -48,6 +48,7 @@ class HttpHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
 
         ConnectionLogUnit logUnit = new ConnectionLogUnit(requestIP, URI, sentBytes, receivedBytes, speed);
 
+        StatisticsHandler.addRequestsCounter(requestIP, URI);
         StatisticsHandler.addLogUnit(logUnit);
     }
 
