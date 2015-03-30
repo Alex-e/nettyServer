@@ -1,15 +1,11 @@
 package ua.ieromenko.server;
 
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.handler.codec.http.FullHttpRequest;
-import io.netty.handler.codec.http.HttpRequest;
 import io.netty.handler.traffic.ChannelTrafficShapingHandler;
-import io.netty.util.AttributeKey;
 import ua.ieromenko.util.ConnectionLogUnit;
 import ua.ieromenko.util.LoggingQueue;
 import ua.ieromenko.util.RequestsCounter;
 
-import java.net.InetSocketAddress;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -37,8 +33,8 @@ public class StatisticsHandler extends ChannelTrafficShapingHandler {
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-            totalConnectionsCounter.getAndIncrement();
-            activeConnectionsCounter.getAndIncrement();
+        totalConnectionsCounter.getAndIncrement();
+        activeConnectionsCounter.getAndIncrement();
         super.channelRead(ctx, msg);
     }
 
@@ -50,7 +46,7 @@ public class StatisticsHandler extends ChannelTrafficShapingHandler {
     }
 
     public static void addLogUnit(ConnectionLogUnit unit) {
-         log.add(unit);
+        log.add(unit);
     }
 
     public static void addURLRedirection(String url) {
