@@ -13,6 +13,7 @@ public class ServerInitializer extends ChannelInitializer<SocketChannel> {
 
     //The TrafficCounter is stopped because it counts bytes only inside request`s body
     private final StatisticsHandler statisticsHandler = new StatisticsHandler(0);
+    private final HttpHandler httpHandler = new HttpHandler();
 
     @Override
     public void initChannel(SocketChannel ch) throws Exception {
@@ -21,7 +22,7 @@ public class ServerInitializer extends ChannelInitializer<SocketChannel> {
         p.addLast("codec", new HttpServerCodec());
         p.addLast("aggregator", new HttpObjectAggregator(512 * 1024));
         p.addLast("statisticsHandler", statisticsHandler);
-        p.addLast("handler", new HttpHandler());
+        p.addLast("handler", httpHandler);
     }
 
 }

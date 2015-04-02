@@ -3,6 +3,7 @@ package ua.ieromenko.server;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelFutureListener;
+import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.codec.http.FullHttpRequest;
@@ -13,6 +14,7 @@ import ua.ieromenko.util.ConnectionLogUnit;
 import java.net.InetSocketAddress;
 import java.util.Date;
 
+import static io.netty.channel.ChannelHandler.Sharable;
 import static io.netty.handler.codec.http.HttpHeaders.Names.CONTENT_TYPE;
 
 /**
@@ -21,6 +23,7 @@ import static io.netty.handler.codec.http.HttpHeaders.Names.CONTENT_TYPE;
  * Main HttpRequests handler
  * <p/>
  */
+@Sharable
 class HttpHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
     private static final NotFoundUriHandler NOT_FOUND_URI_HANDLER = new NotFoundUriHandler();
     private static final HelloUriHandler HELLO_URI_HANDLER = new HelloUriHandler();

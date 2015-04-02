@@ -19,7 +19,10 @@ public final class LoggingQueue<E> implements Iterable<E> {
 
     public synchronized boolean add(E e) {
         counter++;
-        if (counter == 16) queue.remove();
+        if (counter == 16) {
+            queue.remove();
+            counter--;
+        }
         return queue.add(e);
     }
 
